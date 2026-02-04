@@ -1,9 +1,27 @@
+import json
+
+
 class Barang:
     def __init__(self, nama, stock, harga):
         self.nama = nama
         self.stock = stock
         self.harga = harga
     
+
+
+    def to_dict(self):
+        return {
+            "nama" : self.nama, 
+            "stock" : self.stock,
+            "harga" : self.harga
+        }
+    
+
+    @staticmethod
+    def from_dict(data):
+        return Barang(data["nama"], data["stock"], data["harga"])
+    
+
 
     def tambah_stock(self, jumlah):
         self.stock += jumlah
@@ -36,6 +54,28 @@ class Gudang:
     def __init__(self):
         self.list = {}
         self.pilih = ""
+
+
+    def save(self):
+        data = {}
+        for nama , barang in self.list.items():
+            data[nama] = barang.to_dict()
+        
+        with open("gudang.json", "w") as files:
+            json.dump(data, files, indent=4)
+
+    
+    def load(self):
+        data = {}
+        
+        try:
+            with open("gudang.json", "r") as files:
+                data = json.load(files)
+        
+            for nama, barang in data.items():
+                self.list[nama] = Barang.from_dict(barang)
+        except(FileNotFoundError, json.JSONDecodeError):
+            self.list = {}
     
 
     def tambah_barang(self, nama, stock, harga):
@@ -81,6 +121,7 @@ class Gudang:
 
 def main():
     g = Gudang()
+    g.load()
 
     while True:
         print("Menu Halaman Utama")
@@ -98,6 +139,7 @@ def main():
         if nomor == "6":
             print("Sampai Jumpa")
             print("")
+            g.save() 
             break
         
 
@@ -199,7 +241,9 @@ def main():
 
             print("")
         else:
-            print("angka tidak valid")           
+            print("angka tidak valid")    
+
+          
             
         
 main()
