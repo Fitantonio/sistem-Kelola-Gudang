@@ -1,5 +1,5 @@
 import json
-
+from datetime import datetime
 
 class Barang:
     def __init__(self, nama, stock, harga):
@@ -54,6 +54,7 @@ class Gudang:
     def __init__(self):
         self.list = {}
         self.pilih = ""
+        self.history_list = []
 
 
     def save(self):
@@ -110,8 +111,43 @@ class Gudang:
         if len(self.list) == 0:
             return "Gudang Kosong"
         for i, item in enumerate(self.list):
-            result +=  f"{i + 1}. {item}, stok : {self.list[item].stock}, harga : {self.list[item].harga} \n"
+            result +=  f"{i + 1}. {item}, stok : {self.list[item].stock}, harga : Rp. {self.list[item].harga} \n"
         return result
+    
+
+
+    def history(self, keterangan, date, key, value=None):
+        data = None
+        if keterangan == "barang-baru":
+            data = f"[{date}], {keterangan} : {key}, stock awal : {value}"
+        elif keterangan == "tambah-stock":
+            data = f"[{date}], {keterangan} : {key}, tambah stock : {value}"
+        elif keterangan == "kurang-stock":
+            data = f"[{date}], {keterangan} : {key}, kurang stock : {value}"
+        elif keterangan == "ubah-harga":
+            data = f"[{date}], {keterangan} : {key}, harga baru : {value}"
+        elif keterangan == "hapus-barang":
+            data = f"[{date}], {keterangan} : {key}"
+        else:
+            return False
+        
+        self.history_list.append(data)
+
+        with open("riwayat.json", "w") as files:
+            json.dump(self.history_list, files, indent=4)
+
+        return True
+
+
+    def load_history(self):
+        try:
+            with open("riwayat.json", "r") as files:
+                self.history_list = json.load(files)
+        except (FileNotFoundError, json.JSONDecodeError):
+            self.history_list = []
+
+
+
 
 
 
@@ -122,6 +158,11 @@ class Gudang:
 def main():
     g = Gudang()
     g.load()
+    g.load_history()
+
+    def time():
+        temp = datetime.now()
+        return(temp.strftime("%Y-%m-%d %H:%M:%S"))
 
     while True:
         print("Menu Halaman Utama")
@@ -130,13 +171,14 @@ def main():
         print("3. Tambah jenis Barang")
         print("4. Hapus jenis Barang")
         print("5. Edit Info barang")
-        print("6. Keluar")
+        print("6. lihat riwayat gudang")
+        print("7. Keluar")
         print("")
         
         nomor = input("pilih menu : ")
         print("")
         
-        if nomor == "6":
+        if nomor == "7":
             print("Sampai Jumpa")
             print("")
             g.save() 
@@ -168,11 +210,17 @@ def main():
 
                 if g.tambah_barang(jenis, stockAwal, harga):
                     print("barang berhasil ditambahkan")
+                    
+                    g.history("barang-baru", time(), jenis, stockAwal)
+                    
                 else:
                     print("barang sudah ada")
             except ValueError:
                 print("masukan harus berupa Angka")
             print("")
+            
+            
+            g.save()
         
 
         
@@ -180,9 +228,11 @@ def main():
             hapus = input("masukan nama barang yang ingin di hapus : ")
             if g.hapus_barang(hapus):
                 print("barang berhasil di hapus")
+                g.history("hapus-barang", time(), hapus)
             else:
                 print("Barang tidak di temukan")
             print("")
+
 
         
 
@@ -209,6 +259,8 @@ def main():
                         tambah = int(input("masukan tambahan stock : "))
                         g.list[pilih].tambah_stock(tambah)
                         print("barang berhasil di tambahkan")
+                        g.history("tambah-stock", time(), pilih, tambah)
+                        
                     except ValueError:
                         print("masukan harus berupa Angka")
 
@@ -217,6 +269,7 @@ def main():
                         kurang = int(input("masukan nominal pengurangan stock : "))
                         if g.list[pilih].kurang_stock(kurang):
                             print("barang berhasil di Kurangi")
+                            g.history("kurang-stock", time(), pilih, kurang)
                         else:
                             print("nomimal melebihi banyak stock")
 
@@ -230,6 +283,7 @@ def main():
                         ubah = int(input("masukan harga baru : "))
                         g.list[pilih].ubah_harga(ubah)
                         print("harga berhasil di rubah")
+                        g.history("ubah-harga", time(), pilih, ubah)
                     except ValueError:
                         print("masukan harus berupa Angka")
                     
@@ -240,8 +294,20 @@ def main():
                     print("angka tidak valid")
 
             print("")
+        
+        elif nomor == "6":
+            if not g.history_list:
+                print("belum ada riwayat")
+            else:
+                print("======== Riwayat ========")
+                for items in g.history_list:
+                    print(items)
+                print("=========================")
+            print("")
+
         else:
-            print("angka tidak valid")    
+            print("angka tidak valid")  
+        
 
           
             
