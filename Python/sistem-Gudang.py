@@ -16,13 +16,14 @@ def main():
         print("4. Hapus jenis Barang")
         print("5. Edit Info barang")
         print("6. lihat riwayat gudang")
-        print("7. Keluar")
+        print("7. Hapus riwayat gudang")
+        print("8. Keluar")
         print("")
         
         nomor = input("pilih menu : ")
         print("")
         
-        if nomor == "7":
+        if nomor == "8":
             print("Sampai Jumpa")
             print("")
             db.close()
@@ -68,6 +69,7 @@ def main():
 
                     if g.tambah_barang(jenis, stockAwal, harga):
                         print("barang berhasil ditambahkan")
+                        g.update_history("tambah-barang(values = stock awal)", jenis, stockAwal)
                     else:
                         print("barang sudah ada")
                 except ValueError:
@@ -83,6 +85,7 @@ def main():
                 pilih = ""
             if g.hapus_barang(hapus):
                 print("barang berhasil di hapus")
+                g.update_history("hapus-barang", hapus)
             else:
                 print("Barang tidak di temukan")
             print("")
@@ -112,6 +115,7 @@ def main():
                         tambah = int(input("masukan tambahan stock : "))
                         if g.tambah_stock(pilih, tambah):
                             print("barang berhasil di tambahkan")
+                            g.update_history("tambah-stock-barang(values = nominal tambahan)", pilih, tambah)
                         else:
                             print("barang tidak ditemukan")
                         
@@ -123,6 +127,7 @@ def main():
                         kurang = int(input("masukan nominal pengurangan stock : "))
                         if g.kurang_stock(pilih, kurang):
                             print("barang berhasil di Kurangi")
+                            g.update_history("kurang-stock-barang(values = nomial pengurangan)", pilih, kurang)
                         else:  
                             print("nomimal melebihi banyak stock")
 
@@ -136,6 +141,7 @@ def main():
                         ubah = int(input("masukan harga baru : "))
                         if g.update_harga(pilih, ubah):
                             print("harga berhasil di rubah")
+                            g.update_history("ubah-harga(values = harga baru)", pilih, ubah)
                         else:
                             print("barang tidak ditemukan")
                     except ValueError:
@@ -152,8 +158,37 @@ def main():
             print("")
         
 
+        elif nomor == "6":
+            data = g.tampilkan_history()
+            if not data:
+                print("history masih kosong")
+            else:
+                result = []
+                for time, kategori, nama, value in data:
+                    result.append(f"{time} | nama:  {nama} | kategori: {kategori} | values: {value}")
+
+                for i in result:
+                    print(i)
+            
+            print("")
+
+        
+        elif nomor == "7":
+            data = input("apakah anda yakin (y/n) : ")
+            if data == "y" or data == "Y":
+                if g.delete_history():
+                    print("data riwayat berhasil di hapus")
+                else:
+                    print("error")
+            else:
+                print("operasi di batalkan, kembali ke menu utama")
+
+            print("")
+
+
         else:
             print("angka tidak valid")  
+            print("")
                  
         
 main()
