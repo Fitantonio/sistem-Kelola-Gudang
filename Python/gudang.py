@@ -90,5 +90,32 @@ class Gudang:
 
 
 
+    def validate_string(self, s):
+        st = ""
+        if not s:
+            st += "Input kosong,"
+
+        if " " in s:
+            st +=  "Spasi tidak diperbolehkan,"
+
+        if not s.isalnum():
+            st += "Simbol tidak diperbolehkan (hanya huruf & angka),"
+
+        if st == "" : st = True
+
+        return st
 
 
+
+    def validate_number(self, n):
+        val = n
+        if val < 0:
+            return "Nominal harus positif"
+        return True
+
+
+
+    
+    def cari_barang(self, nama):
+        sql = 'SELECT nama, stock, harga FROM barang WHERE nama LIKE ?'
+        return self.db.fetchall(sql, (f'{nama}%',))

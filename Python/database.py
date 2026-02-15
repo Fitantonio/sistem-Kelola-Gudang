@@ -38,14 +38,14 @@ class Database:
 
 
 
-    def execute(self,sql, param):
+    def execute(self, sql, param=()):
         self.cursor.execute(sql, param)
         self.conn.commit()
         return self.cursor.rowcount
         
 
 
-    def fetchone(self, sql, param):
+    def fetchone(self, sql, param=()):
         self.cursor.execute(sql, param)
         return self.cursor.fetchone()
     

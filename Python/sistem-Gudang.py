@@ -17,13 +17,14 @@ def main():
         print("5. Edit Info barang")
         print("6. lihat riwayat gudang")
         print("7. Hapus riwayat gudang")
-        print("8. Keluar")
+        print("8. Cari Barang")
+        print("9. Keluar")
         print("")
         
         nomor = input("pilih menu : ")
         print("")
         
-        if nomor == "8":
+        if nomor == "9":
             print("Sampai Jumpa")
             print("")
             db.close()
@@ -47,7 +48,7 @@ def main():
 
 
         elif nomor == "2":
-            nama = input("masukan nama barang yang ingin di pilih : ")
+            nama = input("masukan nama barang yang ingin di pilih : ").lower()
             if g.pilih_barang(nama):
                 print("barang berhasil di pilih")
                 pilih = nama
@@ -58,29 +59,34 @@ def main():
 
 
         elif nomor == "3":
-            jenis = input("masukan nama Barang : ")
-            if jenis == "" :
-                print("nama harus di isi")
-                continue
-            else:
+            jenis = input("masukan nama Barang : ").lower()
+            p = g.validate_string(jenis)
+            if p == True:
                 try:
                     stockAwal = int(input("masukan Stock Awal : "))
                     harga = int(input("masukan Harga barang : "))
 
-                    if g.tambah_barang(jenis, stockAwal, harga):
-                        print("barang berhasil ditambahkan")
-                        g.update_history("tambah-barang(values = stock awal)", jenis, stockAwal)
+                    if (g.validate_number(stockAwal) != True ):
+                        print(g.validate_number(stockAwal))
+                    elif(g.validate_number(harga) != True ):
+                        print(g.validate_number(harga))
                     else:
-                        print("barang sudah ada")
+                        if g.tambah_barang(jenis, stockAwal, harga):
+                            print("barang berhasil ditambahkan")
+                            g.update_history("tambah-barang(values = stock awal)", jenis, stockAwal)
+                        else:
+                            print("barang sudah ada")
                 except ValueError:
                     print("masukan harus berupa Angka")
+            else:
+                print(p)
             print("")
             
         
 
         
         elif nomor == "4":
-            hapus = input("masukan nama barang yang ingin di hapus : ")
+            hapus = input("masukan nama barang yang ingin di hapus : ").lower()
             if hapus == pilih:
                 pilih = ""
             if g.hapus_barang(hapus):
@@ -113,11 +119,14 @@ def main():
                 if num == "1":
                     try:
                         tambah = int(input("masukan tambahan stock : "))
-                        if g.tambah_stock(pilih, tambah):
-                            print("barang berhasil di tambahkan")
-                            g.update_history("tambah-stock-barang(values = nominal tambahan)", pilih, tambah)
+                        if g.validate_number(tambah) != True:
+                            print(g.validate_number(tambah))
                         else:
-                            print("barang tidak ditemukan")
+                            if g.tambah_stock(pilih, tambah):
+                                print("barang berhasil di tambahkan")
+                                g.update_history("tambah-stock-barang(values = nominal tambahan)", pilih, tambah)
+                            else:
+                                print("barang tidak ditemukan")
                         
                     except ValueError:
                         print("masukan harus berupa Angka")
@@ -125,11 +134,14 @@ def main():
                 elif num == "2":
                     try:
                         kurang = int(input("masukan nominal pengurangan stock : "))
-                        if g.kurang_stock(pilih, kurang):
-                            print("barang berhasil di Kurangi")
-                            g.update_history("kurang-stock-barang(values = nomial pengurangan)", pilih, kurang)
-                        else:  
-                            print("nomimal melebihi banyak stock")
+                        if g.validate_number(kurang) != True:
+                            print(g.validate_number(kurang))
+                        else:
+                            if g.kurang_stock(pilih, kurang):
+                                print("barang berhasil di Kurangi")
+                                g.update_history("kurang-stock-barang(values = nomial pengurangan)", pilih, kurang)
+                            else:  
+                                print("nomimal melebihi banyak stock")
 
                     except ValueError:
                         print("masukan harus berupa Angka")
@@ -139,11 +151,14 @@ def main():
                 elif num == "3":
                     try:
                         ubah = int(input("masukan harga baru : "))
-                        if g.update_harga(pilih, ubah):
-                            print("harga berhasil di rubah")
-                            g.update_history("ubah-harga(values = harga baru)", pilih, ubah)
+                        if g.validate_number(ubah) != True:
+                            print(g.validate_number(ubah))
                         else:
-                            print("barang tidak ditemukan")
+                            if g.update_harga(pilih, ubah):
+                                print("harga berhasil di rubah")
+                                g.update_history("ubah-harga(values = harga baru)", pilih, ubah)
+                            else:
+                                print("barang tidak ditemukan")
                     except ValueError:
                         print("masukan harus berupa Angka")
                     
@@ -174,7 +189,7 @@ def main():
 
         
         elif nomor == "7":
-            data = input("apakah anda yakin (y/n) : ")
+            data = input("apakah anda yakin (y/n) : ").lower()
             if data == "y" or data == "Y":
                 if g.delete_history():
                     print("data riwayat berhasil di hapus")
@@ -183,6 +198,19 @@ def main():
             else:
                 print("operasi di batalkan, kembali ke menu utama")
 
+            print("")
+
+
+        elif nomor == "8":
+            data = input("masukan nama barang yang ingin di cari : ").lower()
+            result = g.cari_barang(data)
+
+            print("")
+            if result:
+                for nama, stock, harga in result:
+                    print(f"{nama} | stock: {stock} | harga: {harga}")
+            else:
+                print("barang tidak di temukan")
             print("")
 
 
